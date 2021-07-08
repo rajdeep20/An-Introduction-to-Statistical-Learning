@@ -1,5 +1,4 @@
 
-```{r}
 #(a)
 rm(list=ls())
 library(ISLR)
@@ -11,24 +10,21 @@ names(Weekly)
 #fix(Weekly)
 summary(Weekly)
 pairs(Weekly)
-```
-```{r}
+
 correlations<-cor(Weekly[,1:8])
 corrplot(correlations,method="circle")
 #As can be seen on the scatterplot and correlation matrices, there appears to be a positive correlation
 #between 'Year' and 'Volume' only. From the summary statistics, we can observe that the Lag variables
 #are very similar to each other and 'Today'. There doesn't appear to to be any patterns except for an
 #increase in volume from 1989 to 2001.
-```
-```{r}
+
 #(b)
 glm.fit=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,family=binomial,data=Weekly)
 summary(glm.fit)
 #Lag 2 is statistically significant
 #The positive coefficient shows that if there is positive return 2 weeks previous, the return
 #is likely to go up today
-```
-```{r}
+
 #(c)
 glm.pred=predict(glm.fit,type="response")
 contrasts(Direction)
@@ -40,8 +36,7 @@ contingency_table
 correct_percent=(contingency_table[1,1]+contingency_table[2,2])/sum(contingency_table)
 correct_percent
 #56% of the predictions are correct, i.e., 44% is the training error rate.
-```
-```{r}
+
 #(d)
 train=(Year<2009)
 test_set=Weekly[!train,]
@@ -55,8 +50,7 @@ contingency_table_logistic
 correct_percentage_logistic=(contingency_table_logistic[1,1]+contingency_table_logistic[2,2])/sum(contingency_table_logistic)
 correct_percentage_logistic
 #Logistic fit predicts 62.5% correctly
-```
-```{r}
+
 #(e)
 lda.fit.train=lda(Direction~Lag2,data=Weekly,subset=train)
 lda.pred.test=predict(lda.fit.train,test_set,type="response")
@@ -67,8 +61,7 @@ contingency_table_lda
 correct_percentage_lda=(contingency_table_lda[1,1]+contingency_table_lda[2,2])/sum(contingency_table_lda)
 correct_percentage_lda
 #lda fit predicts 62.5% correctly
-```
-```{r}
+
 #(f)
 qda.fit.train=qda(Direction~Lag2,data=Weekly,subset=train)
 qda.pred.test=predict(qda.fit.train,test_set,type="response")
@@ -79,16 +72,14 @@ contingency_table_qda
 correct_percentage_qda=(contingency_table_qda[1,1]+contingency_table_qda[2,2])/sum(contingency_table_qda)
 correct_percentage_qda
 #qda fit predicts 58.7% correctly
-```
-```{r}
+
 #(g)
 set.seed(1)
 train.predictor=Lag2[train]
 test.predictor=Lag2[!train]
 is.matrix(train.predictor)
 is.matrix(test.predictor)
-```
-```{r}
+
 #changing in matrix
 train.predictor=as.matrix(train.predictor)
 test.predictor=as.matrix(test.predictor)
@@ -100,9 +91,8 @@ contingency_table_knn
 correct_percentage_knn=(contingency_table_knn[1,1]+contingency_table_knn[2,2])/sum(contingency_table_knn)
 correct_percentage_knn
 #knn fit predicts 50% correctly
-```
-```{r}
+
 #(h)
 #logistic and lda are the best fits
-```
+
 
