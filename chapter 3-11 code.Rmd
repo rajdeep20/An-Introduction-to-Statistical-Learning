@@ -1,0 +1,37 @@
+rm(list=ls())
+set.seed(1)
+x=rnorm(100)
+y=2*x+rnorm(100)
+
+#(a)
+lm.fit1=lm(y~x-1) #or we can use lm.fit=lm(y~x+0) for no intercept term
+summary1=summary(lm.fit1)
+summary1
+
+#(b)
+lm.fit2=lm(x~y-1)
+summary2=summary(lm.fit2)
+summary2
+
+#(c)
+coef(summary1)[,"Estimate"]
+beta=summary1$coefficients[,1]
+alpha=summary2$coefficients[,1]
+beta*alpha
+coeff_of_det=summary1$r.squared
+coeff_of_det
+
+#(d), (e)
+n=length(x)
+tstat=sqrt(n-1)*sum(x*y)/sqrt(sum(x^2)*sum(y^2)-(sum(x*y))^2)
+tstat
+tstat_tabulated=summary1$coefficients[,3]
+tstat_tabulated
+
+#(f)
+lm.fit3=lm(y~x) 
+summary3=summary(lm.fit3)
+summary3
+lm.fit4=lm(x~y) 
+summary4=summary(lm.fit4)
+summary4

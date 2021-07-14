@@ -1,0 +1,31 @@
+rm(list=ls())
+?Carseats
+attach(Carseats)
+
+#(a), (b), (c)
+lm.fit=lm(Sales~Price+Urban+US,data=Carseats)
+summary(lm.fit)
+contrasts(Urban)
+contrasts(US)
+
+#(d)
+lm.fit.all=lm(Sales~.,data=Carseats)
+summary(lm.fit.all)
+
+#(e), (f)
+lm.fit.apt=lm(Sales~.-Population-Education-Urban-US,data=Carseats)
+summary(lm.fit.apt)
+
+#(g)
+confint(lm.fit.apt)
+
+#(h)
+par(mfrow=c(2,2))
+plot(lm.fit.apt)
+hat=hatvalues(lm.fit.apt)
+which.max(hat)
+nrow(Carseats)
+cooksd=cooks.distance(lm.fit.apt)
+which(cooksd>7/400)
+res=rstudent(lm.fit.apt)
+which(abs(res)>3)

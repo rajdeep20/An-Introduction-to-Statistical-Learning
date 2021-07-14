@@ -1,0 +1,43 @@
+rm(list=ls())
+library(ISLR)
+library(boot)
+attach(Weekly)
+names(Weekly)
+
+#(a) and LOOCV
+glm.fit=glm(Direction~Lag1+Lag2,family=binomial,data=Weekly)
+cv.error=cv.glm(Weekly,glm.fit)
+names(cv.error$delta)=c("raw cv estrimate","adjusted cv estimate")
+cv.error$delta
+
+#(b)
+Weekly1=Weekly[-1,]
+test_obs=Weekly[1,]
+glm.fit1=glm(Direction~Lag1+Lag2,family=binomial,data=Weekly1)
+
+#(c)
+predicted_prob=predict(glm.fit1,test_obs)
+predicted_prob
+predicted_direction="Down"
+predicted_direction
+actual_direction=test_obs[,9]
+actual_direction
+
+#(d)
+predicted_dir=array(0)
+actual_dir=array(0)
+count=array(0)
+for(i in 1:nrow(Weekly)){
+  glm.fit=glm(Direction~Lag1+Lag2,family=binomial,data=Weekly[-i,])
+  predicted_probs=predict(glm.fit,Weekly[i,],type="response")
+  predicted_dir[i]=ifelse(predicted_probs>0.5,"Up","Down")
+    if(predicted_dir[i]==Weekly$Direction[i]){
+    count[i]=0
+  }else{
+    count[i]=1
+  }
+}
+mean(count)
+
+
+

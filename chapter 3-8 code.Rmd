@@ -1,0 +1,24 @@
+rm(list=ls())
+attach(Auto)
+names(Auto)
+
+#(a)
+lm.fit=lm(mpg~horsepower,data=Auto)
+lm.fit
+summary(lm.fit)
+confidence=predict(lm.fit,data.frame(horsepower=98),interval="confidence")
+confidence
+predicted=predict(lm.fit,data.frame(horsepower=98),interval="prediction")
+predicted
+
+#(b)
+plot(horsepower,mpg,pch=3,col="green",xlab="mpg",ylab="horsepower",main="fitted line plot")
+abline(lm.fit,lwd=2,col="red")
+hat=hatvalues(lm.fit)
+hat[which(hat>0.01)]
+res=rstudent(lm.fit)
+res[which(abs(res)>3)]
+
+#(c)
+par(mfrow=c(2,2))
+plot(lm.fit)

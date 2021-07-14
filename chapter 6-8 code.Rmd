@@ -1,0 +1,92 @@
+rm(list=ls())
+library(leaps)
+set.seed(1)
+#(a)
+x=rnorm(100)
+e=rnorm(100)
+
+#(b)
+b0=50
+b1=6
+b2=3
+b3=1.5
+y=b0+b1*x+b2*x^2+b3*x^3+e
+datafr=data.frame(x,x^2,x^3,x^4,x^5,x^6,x^7,x^8,x^9,x^10,y)
+
+#(c)
+regfit.full=regsubsets(y~.,data=datafr,nvmax=10)
+reg.summary=summary(regfit.full)
+reg.summary
+which.min(reg.summary$cp)
+which.min(reg.summary$bic)
+which.max(reg.summary$adjr2)
+
+par(mfrow=c(3,2))
+plot(reg.summary$cp,xlab="no. of variables",ylab="cp",type="l")
+points(which.min(reg.summary$cp),reg.summary$cp[which.min(reg.summary$cp)]
+       ,col="red",pch=20,cex=3)
+plot(reg.summary$bic,xlab="no. of variables",ylab="bic",type="l")
+points(which.min(reg.summary$bic),reg.summary$bic[which.min(reg.summary$bic)]
+       ,col="red",pch=20,cex=3)
+plot(reg.summary$adjr2,xlab="no. of variables",ylab="adjusted r-squared",type="l")
+points(which.max(reg.summary$adjr2),reg.summary$adjr2[which.max(reg.summary$adjr2)]
+       ,col="red",pch=20,cex=3)
+
+#(d)
+#forward stepwise
+regfit.full.fwd=regsubsets(y~.,data=datafr,nvmax=10,method="forward")
+reg.summary.fwd=summary(regfit.full.fwd)
+reg.summary.fwd
+which.min(reg.summary.fwd$cp)
+which.min(reg.summary.fwd$bic)
+which.max(reg.summary.fwd$adjr2)
+
+#backward stepwise
+regfit.full.bwd=regsubsets(y~.,data=datafr,nvmax=10,method="backward")
+reg.summary.bwd=summary(regfit.full.bwd)
+reg.summary.bwd
+which.min(reg.summary.bwd$cp)
+which.min(reg.summary.bwd$bic)
+which.max(reg.summary.bwd$adjr2)
+
+#(e)
+xm=model.matrix(y~.,data=datafr)[,-1]
+y=datafr$y
+train=sample(1:nrow(xm),nrow(xm)/2)
+test=(-train)
+y.test=y[test]
+library(glmnet)
+lasso.mod=glmnet(xm[train,],y[train],alpha=1)
+cv.out=cv.glmnet(xm[train,],y[train],alpha=1)
+plot(cv.out)
+bestlam=cv.out$lambda.min
+bestlam
+
+out=glmnet(xm,y,alpha=1)
+lasso.coef=predict(out,type="coefficients",s=bestlam)[1:11,]
+lasso.coef[lasso.coef!=0]
+
+#(f)
+b7=5
+y2=b0+b7*x^7+e
+data2=data.frame(x,x^2,x^3,x^4,x^5,x^6,x^7,x^8,x^9,x^10,y2)
+regfit.full2=regsubsets(y2~.,data=data2,nvmax=10)
+reg.summary2=summary(regfit.full2)
+reg.summary2
+which.min(reg.summary2$cp)
+which.min(reg.summary2$bic)
+which.max(reg.summary2$adjr2)
+xm2=model.matrix(y2~.,data=data2)[,-1]
+train2=sample(1:nrow(xm),nrow(xm)/2)
+test2=(-train2)
+y2.test=y2[test2]
+lasso.mod2=glmnet(xm2[train2,],y2[train2],aplha=1)
+cv.out2=cv.glmnet(xm2[train2,],y2[train2],aplha=1)
+plot(cv.out2)
+bestlam2=cv.out2$lambda.min
+bestlam2
+best.model=glmnet(xm2,y2,alpha=1)
+lasso.coeff2=predict(best.model,type="coefficients",s=bestlam2)[1:11,]
+lasso.coeff2
+
+
