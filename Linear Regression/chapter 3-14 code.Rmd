@@ -1,0 +1,57 @@
+set.seed(1)
+rm(list=ls())
+
+#(a)
+x1=runif(100)
+x2=0.5*x1+rnorm(100)/10
+y=2+2*x1+0.3*x2+rnorm(100)
+
+#(b)
+cor(x1,x2)
+plot(x1,x2)
+
+#(c)
+lm.fit1=lm(y~x1+x2)
+summary(lm.fit1)
+
+#(d)
+lm.fit2=lm(y~x1)
+summary(lm.fit2)
+
+#(e)
+lm.fit3=lm(y~x2)
+summary(lm.fit3)
+
+#(f)
+#No, they do not contradict each other as the difference between (c) and (e) can be explained 
+#by the problem of collinearity. When using two variables that are highly collinear, the effect
+#on the response #of one variable can be masked by another. Collinearity also causes the 
+#standard error to increase - as can be seen the std. error of x1+x2 is greater than x1 or x2.
+
+#(g)
+x1=c(x1,0.1)
+x2=c(x2,0.8)
+y=c(y,6)
+lm.fit4=lm(y~x1+x2)
+summary(lm.fit4)
+
+lm.fit5=lm(y~x1)
+summary(lm.fit5)
+
+lm.fit6=lm(y~x2)
+summary(lm.fit6)
+
+par(mfrow=c(2,2))
+plot(lm.fit4)
+res4=rstudent(lm.fit4)
+res4[which(abs(res4)>3)]
+
+par(mfrow=c(2,2))
+plot(lm.fit5)
+res5=rstudent(lm.fit5)
+res5[which(abs(res5)>3)]
+
+par(mfrow=c(2,2))
+plot(lm.fit6)
+res6=rstudent(lm.fit6)
+res6[which(abs(res6)>3)]

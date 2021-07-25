@@ -1,0 +1,83 @@
+rm(list=ls())
+set.seed(1)
+library(MASS)
+attach(Boston)
+names(Boston)
+sum(is.na(Boston))
+
+#(a)
+#Best Subset Selection
+library(leaps)
+predict.regsubsets=function(object,newdata,id){
+  form=as.formula(object$call[[2]])
+  mat=model.matrix(form,newdata)
+  coefi=coef(object,id)
+  xvars=names(coefi)
+  mat[,xvars]%*%coefi
+}
+k=10
+folds=sample(1:k,nrow(Boston),replace=T)
+cv.errors=matrix(NA,k,13,dimnames=list(NULL,paste(1:13)))
+for(j in 1:k){
+  best.fit=regsubsets(crim~.,data=Boston[folds!=j,],nvmax=13)
+  for(i in 1:13){
+    pred=predict.regsubsets(best.fit,Boston[folds==j,],i)
+    cv.errors[j,i]=mean((Boston$crim[folds==j]-pred)^2)
+  }
+}
+mean.cv.errors=apply(cv.errors,2,mean)
+mean.cv.errors
+plot(1:13, mean.cv.errors, xlab = "Number of variables", ylab = "CV error",
+     main= "Best subset selection", pch = 1, type="b")
+which.min(mean.cv.errors)
+mean.cv.errors[which.min(mean.cv.errors)]
+reg.best=regsubsets(crim~.,Boston,nvmax=13)
+summary(reg.best)
+coef(reg.best,9)
+
+#ridge regression
+x=model.matrix(crim~.,data=Boston)[,-1]
+y=Boston$crim
+train=sample(1:nrow(x),nrow(x)/2)
+test=(-train)
+y.test=y[test]
+library(glmnet)
+grid=10^seq(10,-2,length=100)
+cv.out=cv.glmnet(x[train,],y[train],alpha=0)
+bestlam.ridge=cv.out$lambda.min
+bestlam.ridge
+ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid,thres=1e-12)
+ridge.pred=predict(ridge.mod,s=bestlam.ridge,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+ridge.coef=predict(ridge.mod,type="coefficients",s=bestlam.ridge)[1:13,]
+ridge.coef
+
+#the lasso
+cv.outl=cv.glmnet(x[train,],y[train],alpha=1)
+bestlam.lasso=cv.outl$lambda.min
+bestlam.lasso
+lasso.mod=glmnet(x[train,],y[train],lamda=grid,thres=1e-12)
+lasso.pred=predict(lasso.mod,s=bestlam.lasso,newx=x[test,])
+mean((lasso.pred-y.test)^2)
+lasso.coef=predict(lasso.mod,type="coefficients",s=bestlam.lasso)[1:13,]
+lasso.coef
+
+#pcr
+library(pls)
+pcr.fit=pcr(crim~.,data=Boston,subset=train,scale=T,validation="CV")
+validationplot(pcr.fit,val.type="MSEP")
+summary(pcr.fit)
+pcr.pred=predict(pcr.fit,x[test,],ncomp=13)
+mean((pcr.pred-y.test)^2)
+
+#pls
+pls.fit=plsr(crim~.,data=Boston,subset=train,scale=T,validation="CV")
+summary(pls.fit)
+validationplot(pls.fit,val.type="MSEP")
+pls.pred=predict(pls.fit,x[test,],ncomp=11)
+mean((pls.pred-y.test)^2)
+
+
+#(b)
+#In our setup we will opt for the model from best subset selection.
+#No, chas, rm, age, tax has been removed from the model.

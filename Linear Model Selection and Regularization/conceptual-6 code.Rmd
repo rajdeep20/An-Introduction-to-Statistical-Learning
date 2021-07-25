@@ -1,0 +1,23 @@
+y=2
+lambda=2
+beta=seq(-10,10,0.1)
+ridge=function(beta)
+{
+  (y-beta)^2+lambda*beta^2
+}
+r=ridge(beta)
+plot(beta,r,ylab="ridge equation output",main="Ridge Regression Optimization")
+est.beta = y/(1 + lambda)
+est.func = (y - est.beta)^2 + lambda * est.beta^2
+points(est.beta, est.func, col = "red", pch = 4, lwd = 5, cex = est.beta)
+
+beta_lasso=seq(-3,3,0.01)
+lasso=function(beta)
+{
+  (y-beta)^2+lambda*abs(beta)
+}
+l=lasso(beta_lasso)
+plot(beta_lasso,l,ylab="lasso equation output",main="lasso Regression Optimization")
+est.beta = y- lambda/2
+est.func = (y - est.beta)^2 + lambda * abs(est.beta)
+points(est.beta, est.func, col = "red", pch = 4, lwd = 5, cex = est.beta)

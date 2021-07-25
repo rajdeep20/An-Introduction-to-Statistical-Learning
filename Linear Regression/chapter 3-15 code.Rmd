@@ -1,0 +1,34 @@
+rm(list=ls())
+library(MASS)
+attach(Boston)
+
+#(a)
+pval=array(0)
+coeff=array(0)
+for(i in 2:ncol(Boston))
+{
+  pval[i-1]=summary(lm(crim~Boston[,i]))$coefficients[2,4]
+  coeff[i-1]=summary(lm(crim~Boston[,i]))$coefficients[2,1]
+}
+coeff
+data=data.frame(names(Boston[-1]),pval,coeff)
+colnames(data)=c("predictor","p-value","coefficients")
+data
+
+#(b)
+lm.multi= lm(crim~.,data=Boston)
+summary(lm.multi)
+
+#(c)
+y=summary(lm.multi)$coefficients[2:14,1]
+y=as.vector(y)
+plot(coeff,y,xlab="univariate reg coeff.",ylab="multiple reg coeff.")
+
+#(d)
+for(i in 2:ncol(Boston))
+{
+  cat("This is the regression equation of crime on",c(names(Boston[i])))
+  print(summary(lm(crim~Boston[,i]+I(Boston[,i]^2)+I(Boston[,i]^3))))
+}
+
+

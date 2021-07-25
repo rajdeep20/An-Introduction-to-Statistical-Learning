@@ -1,0 +1,58 @@
+rm(list=ls())
+set.seed(1)
+
+#(a)
+x=rnorm(100)
+
+#(b)
+eps=rnorm(100,0,0.5)
+
+#(c)
+y=-1+(0.5*x)+eps
+length(y)
+
+#(d)
+plot(x,y,pch=3,main="Relationship Between X and Y")
+
+#(e)
+lm.fit1=lm(y~x)
+summary(lm.fit1)
+
+#(f)
+abline(lm.fit1,col="red",lwd=2)
+abline(-1,0.5,col="blue",lwd=2)
+legend("bottomright",bty="o",legend=c("least square line","population regression line"),
+       col=c("red","blue"),lty=c(1,2))
+
+(g)
+lm.fit2=lm(y~x+I(x^2))
+summary(lm.fit2)
+
+#(h)
+eps1=rnorm(100,0,0.05)
+y1=-1+(0.5*x)+eps1
+length(y1)
+plot(x,y1,pch=3,main="Relationship Between X and Y with reduced noise")
+lm.fit3=lm(y1~x)
+summary(lm.fit3)
+abline(lm.fit3,col="red",lwd=2)
+abline(-1,0.5,col="blue",lwd=2)
+legend("bottomright",bty="o",legend=c("least square line","population regression line"),
+       col=c("red","blue"),lty=c(1,2))
+
+#(i)
+eps2=rnorm(100,0,0.75)
+y2=-1+(0.5*x)+eps2
+length(y2)
+plot(x,y2,pch=3,main="Relationship Between X and Y with increased noise")
+lm.fit4=lm(y2~x)
+summary(lm.fit4)
+abline(lm.fit4,col="red",lwd=2)
+abline(-1,0.5,col="blue",lwd=2)
+legend("bottomright",bty="o",legend=c("least square line","population regression line"),
+       col=c("red","blue"),lty=c(1,2))
+
+#(j)
+confint(lm.fit1)
+confint(lm.fit3)
+confint(lm.fit4)

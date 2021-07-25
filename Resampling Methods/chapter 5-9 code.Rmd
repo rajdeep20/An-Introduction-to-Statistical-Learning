@@ -1,0 +1,52 @@
+library(MASS)
+set.seed(1)
+attach(Boston)
+names(Boston)
+
+#(a)
+mean(medv)
+
+#(b)
+std.err=sd(medv)/sqrt(nrow(Boston))
+std.err
+
+#(c)
+mean.fn=function(data,index)
+{
+  medv=Boston$medv[index]
+  return(mean(medv))
+}
+boot(Boston,mean.fn,1000)
+
+#(d)
+mu_hat=22.533
+se_mu_hat=0.381
+lcl=mu_hat-2*se_mu_hat
+ucl=mu_hat+2*se_mu_hat
+lcl
+ucl
+t.test(Boston$medv)
+
+#(e)
+mu_med=median(medv)
+mu_med
+
+#(f)
+median.fn=function(data,index)
+{
+  medv=Boston$medv[index]
+  return(median(medv))
+}
+boot(Boston,median.fn,1000)
+
+#(g)
+mu_0.1=quantile(medv,0.1)
+mu_0.1
+tenthPer.fn=function(data,index)
+{
+  medv=Boston$medv[index]
+  return(quantile(medv,0.1))
+}
+boot(Boston,tenthPer.fn,1000)
+
+
