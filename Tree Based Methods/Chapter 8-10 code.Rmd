@@ -1,0 +1,72 @@
+rm(list=ls())
+library(ISLR)
+library(gbm)
+library(tree)
+library(randomForest)
+library(glmnet)
+attach(Hitters)
+names(Hitters)
+set.seed(1)
+
+#(a)
+sum(is.na(Hitters))
+Hitters=na.omit(Hitters)
+sum(is.na(Hitters))
+Hitters$Salary=log(Hitters$Salary)
+
+#(b)
+train=1:200
+Hitters.train=Hitters[train,]
+Hitters.test=Hitters[-train,]
+Salary.train=Hitters$Salary[train]
+Salary.test=Hitters$Salary[-train]
+
+#(c)
+lambda = seq(0.00001,0.5,0.01)
+train.mse=rep(0,length(lambda))
+test.mse=rep(0,length(lambda))
+for(i in 1:length(lambda)){
+  boost.hitters=gbm(Salary~.,data=Hitters.train,distribution="gaussian",n.trees=1000,
+                    interaction.depth=4,shrinkage=lambda[i],verbose=F)
+  train.pred=predict(boost.hitters,newdata=Hitters.train,n.trees=1000)
+  test.pred=predict(boost.hitters,newdata=Hitters.test,n.trees=1000)
+  train.mse[i]=mean((train.pred-Salary.train)^2)
+  test.mse[i]=mean((test.pred-Salary.test)^2)
+}
+plot(lambda,train.mse,xlab=expression(lambda),ylab="training MSE",type="b")
+
+#(e)
+plot(lambda,test.mse,xlab=expression(lambda),ylab="test MSE",type="b")
+min(test.mse)
+lambda.desired=lambda[which.min(test.mse)]
+
+#(e)
+#linear model
+lm.fit = lm(Salary ~ ., data = Hitters.train)
+lm.pred = predict(lm.fit, Hitters.test)
+mean((Salary.test - lm.pred)^2)
+
+#the lasso
+x.train=model.matrix(Salary~.,Hitters.train)[,-1]
+x.test=model.matrix(Salary~.,Hitters.test)[,-1]
+y=Salary.train
+lasso.mod=glmnet(x.train,y,alpha=1)
+cv.out=cv.glmnet(x.train,y,alpha=1)
+bestlam=cv.out$lambda.min
+bestlam
+lasso.pred=predict(lasso.mod,s=bestlam,newx=x.test)
+mean((Salary.test - lasso.pred)^2)
+lasso.pred=predict(lasso.mod,s=bestlam,)
+
+#(f)
+boost.hitters=gbm(Salary~.,data=Hitters.train,distribution="gaussian",n.trees=1000,
+                    interaction.depth=4,shrinkage=lambda.desired,verbose=F)
+summary(boost.hitters) 
+
+#(g)
+p=ncol(Hitters)-1
+bag.hitters=randomForest(Salary~.,data=Hitters.train,mtry=p,importance=T)
+yhat.bag=predict(bag.hitters,newdata=Hitters.test)                    
+mean((yhat.bag-Salary.test)^2)                    
+                    
+                    
