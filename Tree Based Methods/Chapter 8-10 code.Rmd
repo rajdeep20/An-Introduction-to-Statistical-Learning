@@ -35,7 +35,7 @@ for(i in 1:length(lambda)){
 }
 plot(lambda,train.mse,xlab=expression(lambda),ylab="training MSE",type="b")
 
-#(e)
+#(d)
 plot(lambda,test.mse,xlab=expression(lambda),ylab="test MSE",type="b")
 min(test.mse)
 lambda.desired=lambda[which.min(test.mse)]
