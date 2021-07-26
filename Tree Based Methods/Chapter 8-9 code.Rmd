@@ -1,0 +1,58 @@
+rm(list=ls())
+library(ISLR)
+library(tree)
+library(randomForest)
+set.seed(1)
+attach(OJ)
+names(OJ)
+
+#(a)
+train=sample(1:nrow(OJ),800)
+oj.test=OJ$Purchase[-train]
+
+#(b)
+oj.tree=tree(Purchase~.,data=OJ,subset=train)
+summary(oj.tree)
+#The tree uses "LoyalCH", "PriceDiff"," SpecialCH", "ListPriceDiff", "PctDiscMM".
+#Misclassification error rate is 15.88%
+
+#(c)
+oj.tree
+#Let's pick the terminal node labeled by 8. The splitting variable here is "LoyalCH". The
+#splitting value in this node is 0.0356415. There are 59 points in the subtree below this #node. The deviance for all points contained in region below this node is 10.14. The 
+#prediction value at this node is Sales=MM. About 1.7% points in this node has CH as value of
+#sales and about 98.3% points in this node has MM as value of sales.
+
+#(d)
+plot(oj.tree)
+text(oj.tree,pretty=0,cex=0.8)
+#"LoyalCH" is the most important variable in the tree.
+
+#(e)
+yhat.tree=predict(oj.tree,newdata=OJ[-train,],type="class")
+table(yhat.tree,oj.test)
+mean(yhat.tree==oj.test)
+#Misclassification test error rate is about 17%
+
+#(f)
+cv.oj=cv.tree(oj.tree,FUN=prune.misclass)
+cv.oj
+
+#(g)
+plot(cv.oj$size,cv.oj$dev,type="b",xlab="Tree Size",ylab="CV Classification Error")
+
+#(h)
+#tree size 7 corresponds to the lowest cross validated classification error rate.
+
+#(i)
+oj.prune=prune.tree(oj.tree,best=7)
+
+#(j)
+summary(oj.prune)
+#Misclassification error rate of pruned tree is 16.25%
+
+#(k)
+yhat.prune=predict(oj.prune,newdata=OJ[-train,],type="class")
+table(yhat.prune,oj.test)
+mean(yhat.prune==oj.test)
+#Misclassification test error rate is about 16.3%
