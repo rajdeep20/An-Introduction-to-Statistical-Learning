@@ -1,0 +1,62 @@
+rm(list=ls())
+library(ISLR)
+library(gbm)
+library(tree)
+library(class)
+library(randomForest)
+set.seed(5)
+attach(Caravan)
+names(Caravan)
+
+#(a)
+Purchase01=rep(0,5822)
+for(i in 1:5822){
+  if(Purchase[i]=="Yes")
+    Purchase01[i]=1
+  else
+    Purchase01[i]=0
+}
+Caravan=data.frame(Caravan,Purchase01)
+train=1:1000
+caravan.train=Caravan[train,]
+caravan.test=Caravan[-train,]
+purchase.test=Caravan$Purchase[-train]
+#(b)
+boost.caravan=gbm(Purchase01~.-Purchase,data=caravan.train,distribution="bernoulli",n.trees=1000,
+                  interaction.depth=4,shrinkage=0.01)
+summary(boost.caravan)
+#PPERSAUT, MOPLHOOG and MKOOPKLA are three most important variables in that order.
+
+
+#(c)
+#boosting
+boost.prob=predict(boost.caravan,newdata=caravan.test,type="response")
+boost.pred=rep("No",4822)
+boost.pred[boost.prob>0.2]="Yes"
+boost.pred=as.factor(boost.pred)
+tab=table(boost.pred,purchase.test)
+tab
+tab[2,2]/(tab[2,1]+tab[2,2])
+mean(boost.pred!=purchase.test)
+
+#logistic regression
+logistic.caravan=glm(Purchase~.-Purchase01,data=caravan.train,family=binomial)
+logistic.prob=predict(logistic.caravan,newdata=caravan.test,type="response")
+logistic.pred=rep("No",4822)
+logistic.pred[logistic.prob>0.2]="Yes"
+logistic.pred=as.factor(logistic.pred)
+tab=table(logistic.pred,purchase.test)
+tab
+tab[2,2]/(tab[2,1]+tab[2,2])
+mean(logistic.pred!=purchase.test)
+
+#knn
+standardized.x=scale(Caravan[,-c(86,87)])
+train.x=standardized.x[train,]
+test.x=standardized.x[-train,]
+train.y=Purchase[train]
+knn.pred=knn(train.x,test.x,train.y,k=3)
+tab=table(knn.pred,purchase.test)
+tab
+mean(knn.pred!=purchase.test)
+
