@@ -1,0 +1,47 @@
+rm(list=ls())
+library(e1071)
+set.seed(1)
+x1=rnorm(100)
+x2=-x1^2+5+rnorm(100)
+x2[1:30]=x2[1:30]+3
+x2[31:100]=x2[31:100]-3
+y=c(rep(-1,30),rep(1,70))
+dat=data.frame(x1=x1,x2=x2,y=as.factor(y))
+train=sample(1:100,80)
+data.train=dat[train,]
+actual=dat$y[-train]
+
+#linear kernel
+tune.out1=tune(svm,y~.,data=data.train,kernel="linear",
+               ranges=list(cost=c(0.001,0.01,0.1,1,5,10,100)))
+bestmod.lin=tune.out1$best.model
+summary(bestmod.lin)
+plot(bestmod.lin,data.train)
+pred.lin=predict(bestmod.lin,newdata=dat[-train,])
+table(pred.lin,actual)
+
+#polynomial kernel
+set.seed(1)
+tune.out2=tune(svm,y~.,data=data.train,kernel="polynomial",
+               ranges=list(cost=c(0.001,0.01,0.1,1,5,10,100),gamma=c(0.5,1,2,3,4,5)))
+bestmod.pol=tune.out2$best.model
+summary(bestmod.pol)
+plot(bestmod.pol,data.train)
+pred.pol=predict(bestmod.pol,newdata=dat[-train,])
+table(pred.pol,actual)
+
+#radial kernel
+set.seed(1)
+tune.out3=tune(svm,y~.,data=data.train,kernel="radial",
+               ranges=list(cost=c(0.001,0.01,0.1,1,5,10,100),gamma=c(0.5,1,2,3,4,5)))
+bestmod.rad=tune.out3$best.model
+summary(bestmod.rad)
+plot(bestmod.rad,data.train)
+pred.rad=predict(bestmod.rad,newdata=dat[-train,])
+table(pred.rad,actual)
+
+mean(pred.lin!=actual)
+mean(pred.pol!=actual)
+mean(pred.rad!=actual)
+
+

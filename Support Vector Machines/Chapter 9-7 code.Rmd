@@ -1,0 +1,44 @@
+rm(list=ls())
+library(e1071)
+set.seed(1)
+library(ISLR)
+attach(Auto)
+names(Auto)
+
+#(a)
+mpg01=rep(0,nrow(Auto))
+mpg01[mpg>median(mpg)]=1
+Auto=data.frame(Auto,mpg01)
+Auto$mpg01=as.factor(mpg01)
+str(Auto)
+
+#(b)
+tune.lin=tune(svm,mpg01~.,data=Auto,kernel="linear"
+                 ,ranges=list(cost=c(0.001,0.01,0.1,1,5,10)))
+summary(tune.lin)
+tune.lin$best.performance
+
+#(c)
+tune.pol= tune(svm,mpg01~.,data=Auto,kernel="polynomial"
+         ,ranges= list(cost=c(0.001,0.01,0.1,1,5,10),degree= c(1,2,3,4,5)))
+summary(tune.pol)
+tune.pol$best.performance
+
+tune.rad= tune(svm,mpg01~.,data=Auto,kernel="radial"
+               ,ranges= list(cost=c(0.001,0.01,0.1,1,5,10),gamma= c(0.5,1,2,3,4)))
+summary(tune.rad)
+tune.rad$best.performance
+
+#(d)
+svm.lin=svm(mpg01~.,data=Auto,kernel="linear",cost = 1)
+svm.pol=svm(mpg01~.,data=Auto,kernel ="polynomial",cost=10,degree=1)
+svm.rad=svm(mpg01~.,data=Auto,kernel="radial",cost=1,gamma=0.5)
+
+plotpairs = function(fit) {
+  for (name in names(Auto)[!(names(Auto) %in% c("mpg", "mpglevel", "name"))]) {
+    plot(fit, Auto, as.formula(paste("mpg~", name, sep = "")))
+  }
+}
+plotpairs(svm.lin)
+plotpairs(svm.pol)
+plotpairs(svm.rad)
